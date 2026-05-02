@@ -590,6 +590,12 @@ LIBXSMM_API_INLINE internal_malloc_pool_type* internal_scratch_malloc_pool(const
 
 LIBXSMM_API_INTERN int internal_xfree(const void* /*memory*/, internal_malloc_info_type* /*info*/);
 
+#if defined(LIBXSMM_VTUNE)
+LIBXSMM_API_INLINE void internal_get_vtune_jitdesc(const void* code,
+  unsigned int code_id, size_t code_size, const char* code_name,
+  LIBXSMM_VTUNE_JIT_DESC_TYPE* desc);
+#endif
+
 
 LIBXSMM_API_INTERN void internal_scratch_free(const void* /*memory*/, internal_malloc_pool_type* /*pool*/);
 LIBXSMM_API_INTERN void internal_scratch_free(const void* memory, internal_malloc_pool_type* pool)
@@ -1081,7 +1087,10 @@ LIBXSMM_API_INTERN int internal_xfree(const void* memory, internal_malloc_info_t
     else {
 #if defined(LIBXSMM_VTUNE)
       if (0 != (LIBXSMM_MALLOC_FLAG_X & local.flags) && 0 != local.code_id && iJIT_SAMPLING_ON == iJIT_IsProfilingActive()) {
-        iJIT_NotifyEvent(LIBXSMM_VTUNE_JIT_UNLOAD, &local.code_id);
+        LIBXSMM_VTUNE_JIT_DESC_TYPE vtune_jit_desc;
+        /* VTune unload expects a full method descriptor. */
+        internal_get_vtune_jitdesc(memory, local.code_id, local.size, "libxsmm.jit", &vtune_jit_desc);
+        iJIT_NotifyEvent(LIBXSMM_VTUNE_JIT_UNLOAD, &vtune_jit_desc);
       }
 #endif
 #if defined(_WIN32)
