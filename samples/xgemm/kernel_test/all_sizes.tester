@@ -110,6 +110,7 @@ TRA=0
 TRB=0
 BINARY_POSTOP=1
 UNARY_POSTOP=3
+UNARY_POSTOP_LIST="3 4"
 AVNNI=0
 BVNNI=0
 CVNNI=0
@@ -143,42 +144,65 @@ if [ ${TESTFUSED} == 0 ]; then
   ./gemm_kernel ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEF} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} | tee ${TESTFILEF}.out )
   wait
 else
-  (trap 'kill 0' SIGINT; 
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE0} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE0}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE1} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE1}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE2} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE2}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE3} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE3}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE4} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE4}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE5} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE5}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE6} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE6}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE7} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE7}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE8} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE8}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE9} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILE9}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEA} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILEA}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEB} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILEB}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEC} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILEC}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILED} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILED}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEE} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILEE}.fused.out &
-  ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEF} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${UNARY_POSTOP} | tee ${TESTFILEF}.fused.out )
-  wait
+  for CURRENT_UNARY_POSTOP in ${UNARY_POSTOP_LIST}; do
+    (trap 'kill 0' SIGINT;
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE0} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE0}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE1} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE1}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE2} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE2}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE3} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE3}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE4} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE4}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE5} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE5}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE6} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE6}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE7} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE7}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE8} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE8}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILE9} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILE9}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEA} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILEA}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEB} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILEB}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEC} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILEC}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILED} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILED}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEE} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILEE}.fused.uop${CURRENT_UNARY_POSTOP}.out &
+    ./gemm_kernel_fused ${PREC_A} ${PREC_B} ${PREC_COMP} ${PREC_C} ${TESTFILEF} 1 1 0 0 ${TRA} ${TRB} ${AVNNI} ${BVNNI} ${CVNNI} ${BRTYPE} ${BRCOUNT} 1 ${ITERS} ${CHECK} 0 ${BINARY_POSTOP} ${CURRENT_UNARY_POSTOP} | tee ${TESTFILEF}.fused.uop${CURRENT_UNARY_POSTOP}.out )
+    wait
+  done
 fi
 
-mv ${TESTFILE0}.out test_0.out
-mv ${TESTFILE1}.out test_1.out
-mv ${TESTFILE2}.out test_2.out
-mv ${TESTFILE3}.out test_3.out
-mv ${TESTFILE4}.out test_4.out
-mv ${TESTFILE5}.out test_5.out
-mv ${TESTFILE6}.out test_6.out
-mv ${TESTFILE7}.out test_7.out
-mv ${TESTFILE8}.out test_8.out
-mv ${TESTFILE9}.out test_9.out
-mv ${TESTFILEA}.out test_a.out
-mv ${TESTFILEB}.out test_b.out
-mv ${TESTFILEC}.out test_c.out
-mv ${TESTFILED}.out test_d.out
-mv ${TESTFILEE}.out test_e.out
-mv ${TESTFILEF}.out test_f.out
+if [ ${TESTFUSED} == 0 ]; then
+  mv ${TESTFILE0}.out test_0.out
+  mv ${TESTFILE1}.out test_1.out
+  mv ${TESTFILE2}.out test_2.out
+  mv ${TESTFILE3}.out test_3.out
+  mv ${TESTFILE4}.out test_4.out
+  mv ${TESTFILE5}.out test_5.out
+  mv ${TESTFILE6}.out test_6.out
+  mv ${TESTFILE7}.out test_7.out
+  mv ${TESTFILE8}.out test_8.out
+  mv ${TESTFILE9}.out test_9.out
+  mv ${TESTFILEA}.out test_a.out
+  mv ${TESTFILEB}.out test_b.out
+  mv ${TESTFILEC}.out test_c.out
+  mv ${TESTFILED}.out test_d.out
+  mv ${TESTFILEE}.out test_e.out
+  mv ${TESTFILEF}.out test_f.out
+else
+  for CURRENT_UNARY_POSTOP in ${UNARY_POSTOP_LIST}; do
+    mv ${TESTFILE0}.fused.uop${CURRENT_UNARY_POSTOP}.out test_0.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE1}.fused.uop${CURRENT_UNARY_POSTOP}.out test_1.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE2}.fused.uop${CURRENT_UNARY_POSTOP}.out test_2.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE3}.fused.uop${CURRENT_UNARY_POSTOP}.out test_3.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE4}.fused.uop${CURRENT_UNARY_POSTOP}.out test_4.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE5}.fused.uop${CURRENT_UNARY_POSTOP}.out test_5.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE6}.fused.uop${CURRENT_UNARY_POSTOP}.out test_6.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE7}.fused.uop${CURRENT_UNARY_POSTOP}.out test_7.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE8}.fused.uop${CURRENT_UNARY_POSTOP}.out test_8.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILE9}.fused.uop${CURRENT_UNARY_POSTOP}.out test_9.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILEA}.fused.uop${CURRENT_UNARY_POSTOP}.out test_a.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILEB}.fused.uop${CURRENT_UNARY_POSTOP}.out test_b.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILEC}.fused.uop${CURRENT_UNARY_POSTOP}.out test_c.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILED}.fused.uop${CURRENT_UNARY_POSTOP}.out test_d.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILEE}.fused.uop${CURRENT_UNARY_POSTOP}.out test_e.uop${CURRENT_UNARY_POSTOP}.out
+    mv ${TESTFILEF}.fused.uop${CURRENT_UNARY_POSTOP}.out test_f.uop${CURRENT_UNARY_POSTOP}.out
+  done
+fi
 
 rm ${TESTFILE0}
 rm ${TESTFILE1}

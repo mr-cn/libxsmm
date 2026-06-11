@@ -2,6 +2,8 @@
 
 This folder contains tests for kernels, which work on each element of a given input separately. Examples for these operations are adding two matrices or vectors, or applying the square root to all elements individually.
 
+The unary sample/test flow also covers approximation-based activations such as `sigmoid`, `GELU`, and `SiLU`. `SiLU` reuses the same sigmoid approximation path and is exercised through `eltwise_unary_simple` and the generated `kernel_test/unary_*.sh` scripts.
+
 *Disclosure: Performance tests haven't been implemented for all types yet.*
 
 ## Build

@@ -36,6 +36,7 @@
 #define RCP_OP 15
 #define RCP_SQRT_OP 16
 #define EXP_OP 17
+#define SILU_OP 18
 #define REPLICATE_COL_VAR 27
 #define UNZIP 42
 #define FP32_TO_BF16X2 64
@@ -158,6 +159,8 @@ float fp32_unary_compute(float in, unsigned int op) {
     res = LIBXSMM_TANHF(in);
   } else if (op == SIGMOID_OP) {
     res = fsigmoid(in);
+  } else if (op == SILU_OP) {
+    res = in * fsigmoid(in);
   } else if (op == GELU_OP) {
     res = gelu(in);
   } else if (op == GELU_INV_OP) {
@@ -198,6 +201,8 @@ void set_opname(unsigned int op, char *opname) {
     sprintf(opname, "tanh");
   } else if ( op == SIGMOID_OP ) {
     sprintf(opname, "sigmoid");
+  } else if ( op == SILU_OP ) {
+    sprintf(opname, "silu");
   } else if ( op == GELU_OP ) {
     sprintf(opname, "gelu");
   } else if ( op == GELU_INV_OP ) {
@@ -246,6 +251,8 @@ void set_unarytype(unsigned int op, libxsmm_meltw_unary_type *type) {
     unary_type = LIBXSMM_MELTW_TYPE_UNARY_TANH;
   } else if ( op == SIGMOID_OP ) {
     unary_type = LIBXSMM_MELTW_TYPE_UNARY_SIGMOID;
+  } else if ( op == SILU_OP ) {
+    unary_type = LIBXSMM_MELTW_TYPE_UNARY_SILU;
   } else if ( op == GELU_OP ) {
     unary_type = LIBXSMM_MELTW_TYPE_UNARY_GELU;
   } else if ( op == GELU_INV_OP ) {
@@ -574,7 +581,7 @@ int test_unary_op( const libxsmm_blasint M, const libxsmm_blasint N, const libxs
       error_bound = 0.0027;
     }
   } else if ( op == SQRT_OP || op == EXP_OP || op == TANH_OP || op == TANH_INV_OP ||
-              op == SIGMOID_OP || op == SIGMOID_INV_OP || op == GELU_OP || op == GELU_INV_OP ) {
+              op == SIGMOID_OP || op == SIGMOID_INV_OP || op == SILU_OP || op == GELU_OP || op == GELU_INV_OP ) {
     if ( (dtype_in == LIBXSMM_DATATYPE_F32) && (dtype_out == LIBXSMM_DATATYPE_F32) && (dtype_comp == LIBXSMM_DATATYPE_F32) ) {
       error_bound = 0.0007;
     } else if ( dtype_out == LIBXSMM_DATATYPE_BF16 ) {
@@ -688,7 +695,7 @@ int main( int argc, char* argv[] ) {
 
   set_opname(op, opname);
 
-  valid_op = ( op == COPY_OP || op == X2_OP || op == XOR_OP || op == TANH_OP || op == SIGMOID_OP || op == GELU_OP ||
+  valid_op = ( op == COPY_OP || op == X2_OP || op == XOR_OP || op == TANH_OP || op == SIGMOID_OP || op == SILU_OP || op == GELU_OP ||
                op == GELU_INV_OP || op == TANH_INV_OP || op == SIGMOID_INV_OP || op == SQRT_OP || op == NEGATE_OP ||
                op == INC_OP || op == RCP_OP || op == RCP_SQRT_OP || op == EXP_OP || op == REPLICATE_COL_VAR || op == UNZIP) ? 1 : 0;
 

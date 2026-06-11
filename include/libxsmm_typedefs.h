@@ -331,7 +331,8 @@ typedef enum libxsmm_meltw_unary_type {
   LIBXSMM_MELTW_TYPE_UNARY_TRANSFORM_NORM_TO_VNNI8T     = 73,
   LIBXSMM_MELTW_TYPE_UNARY_TRANSFORM_NORM_TO_VNNI8_PAD  = 74,
   LIBXSMM_MELTW_TYPE_UNARY_TRANSFORM_VNNI8T_TO_NORM     = 75,
-  LIBXSMM_MELTW_TYPE_UNARY_TRANSFORM_VNNI8_TO_NORM      = 76
+  LIBXSMM_MELTW_TYPE_UNARY_TRANSFORM_VNNI8_TO_NORM      = 76,
+  LIBXSMM_MELTW_TYPE_UNARY_SILU                         = 77
 } libxsmm_meltw_unary_type;
 
 typedef enum libxsmm_meltw_binary_flags {

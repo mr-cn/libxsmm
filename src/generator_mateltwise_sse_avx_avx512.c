@@ -119,7 +119,8 @@ void libxsmm_generator_meltw_setup_stack_frame( libxsmm_generated_code*         
 
   /* TODO: Determine if we want to save stuff to stack */
   unsigned int save_args_to_stack = 0;
-  unsigned int allocate_scratch = ( (i_mateltwise_desc->flags & LIBXSMM_MELTW_FLAG_UNARY_REDUCE_ROWS) > 0) ? 1 : 0;
+  unsigned int allocate_scratch = ( ((i_mateltwise_desc->flags & LIBXSMM_MELTW_FLAG_UNARY_REDUCE_ROWS) > 0) ||
+      ((i_mateltwise_desc->operation == LIBXSMM_MELTW_OPERATION_UNARY) && (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SILU)) ) ? 1 : 0;
   unsigned int use_aux_stack_vars = ((io_generated_code->arch < LIBXSMM_X86_AVX512_VL256_SKX) && (i_mateltwise_desc->operation == LIBXSMM_MELTW_OPERATION_UNARY) &&
       ((i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_GELU) || (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_GELU_INV) )) ? 1 : 0;
   unsigned int use_stack_vars = ((save_args_to_stack > 0) || (allocate_scratch > 0) || (use_aux_stack_vars > 0) || (io_generated_code->arch < LIBXSMM_X86_AVX)) ? 1 : 0;
@@ -796,6 +797,7 @@ libxsmm_blasint libxsmm_generator_mateltwise_x86_valid_arch_precision( libxsmm_g
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_DROPOUT)            ||
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_DROPOUT_INV)        ||
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID)            ||
+                  (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SILU)               ||
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV)        ||
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_GELU)               ||
                   (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_GELU_INV))       ) ? 1 : 0;

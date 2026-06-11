@@ -14,7 +14,7 @@ trap 'rm ${TMPFILE}' EXIT
 PREC=PRECDESC
 
 for BINARY_POSTOP in 0 1; do
-  for UNARY_POSTOP in 0 1 2 3; do
+  for UNARY_POSTOP in 0 1 2 3 4; do
     for LD in 'eqld' 'gtld'; do
       for AVNNI in 0 1; do
         for BVNNI in 0 1; do

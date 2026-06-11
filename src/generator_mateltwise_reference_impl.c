@@ -87,6 +87,8 @@ float libxsmm_fp32_unary_compute(float in, libxsmm_meltw_unary_type op) {
     res = LIBXSMM_TANHF(in);
   } else if (op == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID) {
     res = libxsmm_fsigmoid(in);
+  } else if (op == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+    res = in * libxsmm_fsigmoid(in);
   } else if (op == LIBXSMM_MELTW_TYPE_UNARY_GELU) {
     res = libxsmm_gelu(in);
   } else if (op == LIBXSMM_MELTW_TYPE_UNARY_GELU_INV) {

@@ -74,6 +74,8 @@ The [Matrix Multiplication domain (MM)](libxsmm_mm.md) contains routines for:
 * [Batched multiplication (explicit interface)](libxsmm_mm.md#batched-multiplication)
 * [Call wrapper (static and dynamic linkage)](libxsmm_mm.md#call-wrapper)
 
+The MM/xGEMM path also supports selected fused unary `C` post-ops, including `SiLU` on `x86` and `aarch64` GEMM/BRGEMM backends.
+
 ### Deep Learning<a name="interface-for-dl"></a>
 
 The Deep Learning domain is detailed by the following [sample codes](https://github.com/libxsmm/libxsmm/tree/main/samples/deeplearning). Here we demonstrate how common operators in deep learning applications (GEMM with activation function fusion, Convolutions with activation function fusion, various norming operators, and pooling operators, etc.) can be implemented using the Tensor Processing Primitive provided by LIBXSMM. Example drivers for performance evaluation are provided as part of [LIBXSMM_DNN](https://github.com/libxsmm/libxsmm-dnn/tree/main/tests).

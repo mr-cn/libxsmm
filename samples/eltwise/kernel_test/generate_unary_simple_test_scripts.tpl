@@ -13,7 +13,7 @@ trap 'rm ${TMPFILE}' EXIT
 
 PREC=PRECDESC
 
-for TYPE in 1 2 3 4 7 8 9 10 11 12 13 14 15 16 17 27 42 64 65; do
+for TYPE in 1 2 3 4 7 8 9 10 11 12 13 14 15 16 17 18 27 42 64 65; do
   for ROUND in 'rne' 'stoch'; do
     for LD in 'eqld' 'gtld'; do
       TPPNAME="none"
@@ -22,7 +22,7 @@ for TYPE in 1 2 3 4 7 8 9 10 11 12 13 14 15 16 17 27 42 64 65; do
       RMODE=0
 
       # approximations are not supportted for the time being in FP64
-      if [[ (("$TYPE" == '7') || ("$TYPE" == '8') || ("$TYPE" == '9') || ("$TYPE" == '10') || ("$TYPE" == '11') || ("$TYPE" == '12') || ("$TYPE" == '17') || ("$TYPE" == '27')) && ("$PREC" == 'F64_F64_F64') ]]; then
+      if [[ (("$TYPE" == '7') || ("$TYPE" == '8') || ("$TYPE" == '9') || ("$TYPE" == '10') || ("$TYPE" == '11') || ("$TYPE" == '12') || ("$TYPE" == '17') || ("$TYPE" == '18') || ("$TYPE" == '27')) && ("$PREC" == 'F64_F64_F64') ]]; then
         continue
       fi
 
@@ -75,6 +75,8 @@ for TYPE in 1 2 3 4 7 8 9 10 11 12 13 14 15 16 17 27 42 64 65; do
         TPPNAME="rsqrt"
       elif [ "$TYPE" == '17' ] ; then
         TPPNAME="exp"
+      elif [ "$TYPE" == '18' ] ; then
+        TPPNAME="silu"
       elif [ "$TYPE" == '27' ] ; then
         TPPNAME="replicate_col_var"
       elif [ "$TYPE" == '42' ] ; then

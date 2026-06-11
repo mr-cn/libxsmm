@@ -383,7 +383,7 @@ void libxsmm_generator_gemm_amx_paired_tilestore( libxsmm_generated_code*       
         reg_0 = reserved_zmms + col % (31-reserved_zmms);
         reg_1 = reg_0 + 1;
       }
-      if (i_micro_kernel_config->fused_sigmoid == 1) {
+      if (i_micro_kernel_config->fused_sigmoid == 1 || i_micro_kernel_config->fused_silu == 1) {
         if (col + reserved_zmms < 16) {
           reg_1 = col % (16-reserved_zmms) + reserved_zmms + 16;
         } else {
@@ -406,7 +406,7 @@ void libxsmm_generator_gemm_amx_paired_tilestore( libxsmm_generated_code*       
     }
 
     /* In this case also save the result before doing any eltwise */
-    if ((i_micro_kernel_config->fused_sigmoid == 1) && (overwrite_C == 0) ) {
+    if (((i_micro_kernel_config->fused_sigmoid == 1) || (i_micro_kernel_config->fused_silu == 1)) && (overwrite_C == 0) ) {
       char vname = (char)((tile1 >= 0) ? i_micro_kernel_config->vector_name : (is_output_bf16 > 0 || is_output_f16 > 0) ? 'y' : ((is_output_bf8 > 0 || is_output_hf8 > 0) ? 'x' : 'z' ) );
       unsigned int mask_id =  (tile1 >= 0) ? i_micro_kernel_config->mask_m_bf16 : ((tile_in_last_tilerow > 0) ? i_micro_kernel_config->mask_m_fp32 : 0);
 
@@ -443,7 +443,7 @@ void libxsmm_generator_gemm_amx_paired_tilestore( libxsmm_generated_code*       
           reg_1, mask_id, 0, 1 );
     }
 
-    if (i_micro_kernel_config->fused_sigmoid == 1) {
+    if (i_micro_kernel_config->fused_sigmoid == 1 || i_micro_kernel_config->fused_silu == 1) {
       if (tile1 >= 0) {
         libxsmm_generator_sigmoid_ps_rational_78_avx512( io_generated_code, reg_0, i_micro_kernel_config->vec_x2,
             i_micro_kernel_config->vec_nom, i_micro_kernel_config->vec_denom,
@@ -452,6 +452,12 @@ void libxsmm_generator_gemm_amx_paired_tilestore( libxsmm_generated_code*       
             i_micro_kernel_config->vec_c1_d, i_micro_kernel_config->vec_c2_d, i_micro_kernel_config->vec_c3_d,
             i_micro_kernel_config->vec_hi_bound, i_micro_kernel_config->vec_lo_bound, i_micro_kernel_config->vec_ones,
             i_micro_kernel_config->vec_neg_ones, i_micro_kernel_config->vec_halves, 'z' );
+        if (i_micro_kernel_config->fused_silu == 1) {
+          libxsmm_load_vreg_from_amx_tile( io_generated_code, i_micro_kernel_config,
+              use_gemm_scratch, gp_reg_gemm_scratch, i_micro_kernel_config->mask_m_fp32, tile1, (use_gemm_scratch > 0) ? col + n_cols : col, i_micro_kernel_config->vec_x2);
+          libxsmm_x86_instruction_vec_compute_3reg( io_generated_code, LIBXSMM_X86_INSTR_VMULPS,
+                                                    i_micro_kernel_config->vector_name, i_micro_kernel_config->vec_x2, reg_0, reg_0 );
+        }
       }
       libxsmm_load_vreg_from_amx_tile( io_generated_code, i_micro_kernel_config,
           use_gemm_scratch, gp_reg_gemm_scratch, (tile1 < 0) ? ((tile_in_last_tilerow > 0) ? i_micro_kernel_config->mask_m_fp32 : 0) : 0, tile0, col, reg_1);
@@ -462,6 +468,12 @@ void libxsmm_generator_gemm_amx_paired_tilestore( libxsmm_generated_code*       
           i_micro_kernel_config->vec_c1_d, i_micro_kernel_config->vec_c2_d, i_micro_kernel_config->vec_c3_d,
           i_micro_kernel_config->vec_hi_bound, i_micro_kernel_config->vec_lo_bound, i_micro_kernel_config->vec_ones,
           i_micro_kernel_config->vec_neg_ones, i_micro_kernel_config->vec_halves, 'z' );
+      if (i_micro_kernel_config->fused_silu == 1) {
+        libxsmm_load_vreg_from_amx_tile( io_generated_code, i_micro_kernel_config,
+            use_gemm_scratch, gp_reg_gemm_scratch, (tile1 < 0) ? ((tile_in_last_tilerow > 0) ? i_micro_kernel_config->mask_m_fp32 : 0) : 0, tile0, col, i_micro_kernel_config->vec_x2);
+        libxsmm_x86_instruction_vec_compute_3reg( io_generated_code, LIBXSMM_X86_INSTR_VMULPS,
+                                                  i_micro_kernel_config->vector_name, i_micro_kernel_config->vec_x2, reg_1, reg_1 );
+      }
       if (is_output_bf16 > 0) {
         libxsmm_x86_instruction_vec_compute_3reg( io_generated_code, LIBXSMM_X86_INSTR_VCVTNE2PS2BF16,
                                                   i_micro_kernel_config->vector_name, reg_1, reg_0, reg_0 );
@@ -763,7 +775,7 @@ void libxsmm_generator_gemm_amx_single_tilestore( libxsmm_generated_code*       
   unsigned int col = 0, reg_0 = 0;
   unsigned int gp_reg_gemm_scratch = (i_micro_kernel_config->m_loop_exists == 0) ? i_gp_reg_mapping->gp_reg_help_0 : i_gp_reg_mapping->gp_reg_help_1;
   unsigned int reserved_zmms       = i_micro_kernel_config->reserved_zmms;
-  unsigned int fused_eltwise       = ((i_micro_kernel_config->fused_relu == 1) || (i_micro_kernel_config->fused_relu_nobitmask == 1) || (i_micro_kernel_config->fused_sigmoid == 1)) ? 1 : 0;
+  unsigned int fused_eltwise       = ((i_micro_kernel_config->fused_relu == 1) || (i_micro_kernel_config->fused_relu_nobitmask == 1) || (i_micro_kernel_config->fused_sigmoid == 1) || (i_micro_kernel_config->fused_silu == 1)) ? 1 : 0;
   int tile_in_last_tilerow         = libxsmm_is_tile_in_last_tilerow(i_micro_kernel_config, tile);
   int maskid                       = ((tile_in_last_tilerow > 0) && (i_micro_kernel_config->m_remainder > 0)) ? i_micro_kernel_config->mask_m_fp32 : 0;
   unsigned int use_gemm_scratch = (io_generated_code->arch >= LIBXSMM_X86_AVX512_DMR) ? 0 : 1;

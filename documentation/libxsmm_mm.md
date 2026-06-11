@@ -14,6 +14,8 @@ libxsmm_?gemm(NULL/*transa*/, NULL/*transb*/,
 
 For the C interface (with type prefix `s` or `d`), all arguments including m, n, and k are passed by pointer. This is needed for binary compatibility with the original GEMM/BLAS interface.
 
+For xGEMM-style extended GEMM fusion, `C` post-ops include unary activations such as `ReLU`, `sigmoid`, and `SiLU`. The fused `SiLU` post-op is currently available on the `x86` and `aarch64` GEMM/BRGEMM backends. Equation/MEQN auto-fusion and RV64 GEMM fusion do not currently expose `SiLU`.
+
 ```C
 libxsmm_gemm(NULL/*transa*/, NULL/*transb*/,
   m/*required*/, n/*required*/, k/*required*/,

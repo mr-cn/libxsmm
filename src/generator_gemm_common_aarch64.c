@@ -446,6 +446,7 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_sve(  libxsm
   unsigned int n_reserved_vregs = 16;
   unsigned int l_vec_c0 = 0, l_vec_c1 = 1, l_vec_c2 = 2, l_vec_c3 = 3, l_vec_c1_d = 4, l_vec_c2_d = 5, l_vec_c3_d = 6, l_vec_hi_bound = 7, l_vec_lo_bound = 8, l_vec_ones = 9, l_vec_neg_ones = 10, l_vec_halves = 11, l_vec_tmp = 12, l_vec_x2 = 13, l_vec_nom = 14, l_vec_denom = 15, l_mask_hi = 6, l_mask_lo = 5;
   unsigned int l_vec_x = 0;
+  unsigned int l_silu_tmp_scratch_offset = 0;
 
   LIBXSMM_UNUSED( i_xgemm_desc );
   LIBXSMM_UNUSED( io_micro_kernel_config );
@@ -459,6 +460,7 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_sve(  libxsm
   if (i_is_mmla_regblock > 0) {
     l_vec_reg_acc_start = l_vr_c[0];
   }
+  l_silu_tmp_scratch_offset = (l_vec_reg_acc_start < n_reserved_vregs) ? ((n_reserved_vregs - l_vec_reg_acc_start + 1) * 64) : 0;
 
   /* Save the accumulators to scratch */
   if (l_vec_reg_acc_start < n_reserved_vregs) {
@@ -494,8 +496,29 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_sve(  libxsm
         } else {
           l_vec_x = l_cur_vreg;
         }
+        if ((io_micro_kernel_config->fused_silu > 0) && !((l_vec_reg_acc_start < n_reserved_vregs) && (l_cur_vreg <= n_reserved_vregs))) {
+          libxsmm_generator_gemm_getval_stack_var_aarch64( io_generated_code, LIBXSMM_GEMM_STACK_VAR_GEMM_SCRATCH_PTR, i_gp_reg_scratch0);
+          if (l_silu_tmp_scratch_offset > 0) {
+            libxsmm_aarch64_instruction_alu_compute_imm64( io_generated_code, LIBXSMM_AARCH64_INSTR_GP_META_ADD, i_gp_reg_scratch0, i_gp_reg_scratch1, i_gp_reg_scratch0, l_silu_tmp_scratch_offset );
+          }
+          libxsmm_aarch64_instruction_sve_move( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_STR_Z_I_OFF, i_gp_reg_scratch0, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_x, LIBXSMM_AARCH64_SVE_REG_UNDEF );
+        }
         libxsmm_generator_sigmoid_ps_rational_78_aarch64_sve(  io_generated_code, l_vec_x, l_vec_x2, l_vec_nom, l_vec_denom,l_mask_hi, l_mask_lo,
             l_vec_c0, l_vec_c1, l_vec_c2, l_vec_c3, l_vec_c1_d, l_vec_c2_d, l_vec_c3_d, l_vec_hi_bound, l_vec_lo_bound, l_vec_ones, l_vec_neg_ones, l_vec_halves, l_vec_tmp, l_sve_type, l_pred_reg  );
+        if (io_micro_kernel_config->fused_silu > 0) {
+          if ((l_vec_reg_acc_start < n_reserved_vregs) && (l_cur_vreg <= n_reserved_vregs)) {
+            libxsmm_aarch64_instruction_sve_move( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_LDR_Z_I_OFF, i_gp_reg_scratch1, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_tmp, LIBXSMM_AARCH64_SVE_REG_UNDEF );
+          } else {
+            libxsmm_generator_gemm_getval_stack_var_aarch64( io_generated_code, LIBXSMM_GEMM_STACK_VAR_GEMM_SCRATCH_PTR, i_gp_reg_scratch0);
+            if (l_silu_tmp_scratch_offset > 0) {
+              libxsmm_aarch64_instruction_alu_compute_imm64( io_generated_code, LIBXSMM_AARCH64_INSTR_GP_META_ADD, i_gp_reg_scratch0, i_gp_reg_scratch1, i_gp_reg_scratch0, l_silu_tmp_scratch_offset );
+            }
+            libxsmm_aarch64_instruction_sve_move( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_LDR_Z_I_OFF, i_gp_reg_scratch0, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_tmp, LIBXSMM_AARCH64_SVE_REG_UNDEF );
+          }
+          libxsmm_aarch64_instruction_sve_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_FMUL_V,
+                                                   l_vec_tmp, l_vec_x, 0, l_vec_x,
+                                                   l_pred_reg, l_sve_type );
+        }
 
         if (l_vec_reg_acc_start < n_reserved_vregs) {
           if (l_cur_vreg <= n_reserved_vregs) {
@@ -538,6 +561,7 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_asimd(  libx
   unsigned int n_reserved_vregs = 18;
   unsigned int l_vec_c0 = 0, l_vec_c1 = 1, l_vec_c2 = 2, l_vec_c3 = 3, l_vec_c1_d = 4, l_vec_c2_d = 5, l_vec_c3_d = 6, l_vec_hi_bound = 7, l_vec_lo_bound = 8, l_vec_ones = 9, l_vec_neg_ones = 10, l_vec_halves = 11, l_vec_tmp = 12, l_vec_x2 = 13, l_vec_nom = 14, l_vec_denom = 15, l_mask_hi = 16, l_mask_lo = 17;
   unsigned int l_vec_x = 0;
+  unsigned int l_silu_tmp_scratch_offset = 0;
 
   LIBXSMM_UNUSED( i_xgemm_desc );
   LIBXSMM_UNUSED( io_micro_kernel_config );
@@ -557,6 +581,7 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_asimd(  libx
   } else {
     l_vec_reg_acc_start = i_vec_reg_count - (i_n_blocking * l_m_total_blocks);
   }
+  l_silu_tmp_scratch_offset = (l_vec_reg_acc_start < n_reserved_vregs) ? ((n_reserved_vregs - l_vec_reg_acc_start + 1) * 64) : 0;
 
   /* Save the accumulators to scratch */
   if (l_vec_reg_acc_start < n_reserved_vregs) {
@@ -586,8 +611,28 @@ void libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_asimd(  libx
       } else {
         l_vec_x = l_cur_vreg;
       }
+      if ((io_micro_kernel_config->fused_silu > 0) && !((l_vec_reg_acc_start < n_reserved_vregs) && (l_cur_vreg <= n_reserved_vregs))) {
+        libxsmm_generator_gemm_getval_stack_var_aarch64( io_generated_code, LIBXSMM_GEMM_STACK_VAR_GEMM_SCRATCH_PTR, i_gp_reg_scratch0);
+        if (l_silu_tmp_scratch_offset > 0) {
+          libxsmm_aarch64_instruction_alu_compute_imm64( io_generated_code, LIBXSMM_AARCH64_INSTR_GP_META_ADD, i_gp_reg_scratch0, i_gp_reg_scratch1, i_gp_reg_scratch0, l_silu_tmp_scratch_offset );
+        }
+        libxsmm_aarch64_instruction_asimd_move( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_STR_I_OFF, i_gp_reg_scratch0, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_x, LIBXSMM_AARCH64_ASIMD_WIDTH_Q );
+      }
       libxsmm_generator_sigmoid_ps_rational_78_aarch64_asimd(  io_generated_code, l_vec_x, l_vec_x2, l_vec_nom, l_vec_denom,l_mask_hi, l_mask_lo,
           l_vec_c0, l_vec_c1, l_vec_c2, l_vec_c3, l_vec_c1_d, l_vec_c2_d, l_vec_c3_d, l_vec_hi_bound, l_vec_lo_bound, l_vec_ones, l_vec_neg_ones, l_vec_halves, l_vec_tmp, LIBXSMM_AARCH64_ASIMD_TUPLETYPE_4S );
+      if (io_micro_kernel_config->fused_silu > 0) {
+        if ((l_vec_reg_acc_start < n_reserved_vregs) && (l_cur_vreg <= n_reserved_vregs)) {
+          libxsmm_aarch64_instruction_asimd_move( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_LDR_I_OFF, i_gp_reg_scratch1, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_tmp, LIBXSMM_AARCH64_ASIMD_WIDTH_Q );
+        } else {
+          libxsmm_generator_gemm_getval_stack_var_aarch64( io_generated_code, LIBXSMM_GEMM_STACK_VAR_GEMM_SCRATCH_PTR, i_gp_reg_scratch0);
+          if (l_silu_tmp_scratch_offset > 0) {
+            libxsmm_aarch64_instruction_alu_compute_imm64( io_generated_code, LIBXSMM_AARCH64_INSTR_GP_META_ADD, i_gp_reg_scratch0, i_gp_reg_scratch1, i_gp_reg_scratch0, l_silu_tmp_scratch_offset );
+          }
+          libxsmm_aarch64_instruction_asimd_move( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_LDR_I_OFF, i_gp_reg_scratch0, LIBXSMM_AARCH64_GP_REG_UNDEF, 0, l_vec_tmp, LIBXSMM_AARCH64_ASIMD_WIDTH_Q );
+        }
+        libxsmm_aarch64_instruction_asimd_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_FMUL_V,
+                                                   l_vec_tmp, l_vec_x, 0, l_vec_x, LIBXSMM_AARCH64_ASIMD_TUPLETYPE_4S );
+      }
 
       if (l_vec_reg_acc_start < n_reserved_vregs) {
         if (l_cur_vreg <= n_reserved_vregs) {
@@ -855,7 +900,7 @@ void libxsmm_generator_gemm_apply_fusion_2dregblock_aarch64_asimd(  libxsmm_gene
   if ((io_micro_kernel_config->fused_relu_nobitmask > 0) || (io_micro_kernel_config->fused_relu > 0)) {
     libxsmm_generator_gemm_apply_relu_fusion_2dregblock_aarch64_asimd( io_generated_code, i_xgemm_desc, io_micro_kernel_config, i_gp_reg_scratch0, i_gp_reg_scratch1, i_vec_length, i_vec_reg_count, i_m_blocking, i_n_blocking );
   }
-  if (io_micro_kernel_config->fused_sigmoid > 0) {
+  if (io_micro_kernel_config->fused_sigmoid > 0 || io_micro_kernel_config->fused_silu > 0) {
     libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_asimd( io_generated_code, i_xgemm_desc, io_micro_kernel_config, i_gp_reg_scratch0, i_gp_reg_scratch1, i_vec_length, i_vec_reg_count, i_m_blocking, i_n_blocking );
   }
 }
@@ -873,7 +918,7 @@ void libxsmm_generator_gemm_apply_fusion_2dregblock_aarch64_sve(  libxsmm_genera
   if ((io_micro_kernel_config->fused_relu_nobitmask > 0) || (io_micro_kernel_config->fused_relu > 0)) {
     libxsmm_generator_gemm_apply_relu_fusion_2dregblock_aarch64_sve( io_generated_code, i_xgemm_desc, io_micro_kernel_config, i_gp_reg_scratch0, i_gp_reg_scratch1, i_vec_length, i_vec_reg_count, i_m_blocking, i_n_blocking );
   }
-  if (io_micro_kernel_config->fused_sigmoid > 0) {
+  if (io_micro_kernel_config->fused_sigmoid > 0 || io_micro_kernel_config->fused_silu > 0) {
     libxsmm_generator_gemm_apply_sigmoid_fusion_2dregblock_aarch64_sve( io_generated_code, i_xgemm_desc, io_micro_kernel_config, i_gp_reg_scratch0, i_gp_reg_scratch1, i_vec_length, i_vec_reg_count, i_m_blocking, i_n_blocking, 0 );
   }
 }

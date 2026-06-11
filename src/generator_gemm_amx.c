@@ -1248,7 +1248,7 @@ LIBXSMM_API_INTERN void libxsmm_generator_gemm_convert_KxM_bf8_to_vnni4( libxsmm
   unsigned int k_unroll = 4;
 
   /* Restrict unrolling in case of sigmoid fusion */
-  if (i_micro_kernel_config->fused_sigmoid > 0) {
+  if (i_micro_kernel_config->fused_sigmoid > 0 || i_micro_kernel_config->fused_silu > 0) {
     k_unroll = 1;
   }
 
@@ -3307,7 +3307,7 @@ void libxsmm_generator_gemm_amx_setup_fusion_infra( libxsmm_generated_code*     
     i_micro_kernel_config->norm_to_normT_mask_reg_1  = reserved_mask_regs - 2;
   }
 
-  if (i_micro_kernel_config->fused_sigmoid == 1) {
+  if (i_micro_kernel_config->fused_sigmoid == 1 || i_micro_kernel_config->fused_silu == 1) {
     reserved_zmms       += 15;
     reserved_mask_regs  += 2;
     libxsmm_generator_gemm_prepare_coeffs_sigmoid_ps_rational_78_sse_avx_avx512( io_generated_code, i_micro_kernel_config, reserved_zmms, reserved_mask_regs, temp_reg );

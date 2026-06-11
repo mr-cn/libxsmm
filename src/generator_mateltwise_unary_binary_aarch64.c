@@ -1229,7 +1229,18 @@ void libxsmm_compute_unary_aarch64_2d_reg_block_op( libxsmm_generated_code*     
                                                        l_tupletype );
           }
         }
-      } else if (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID || i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV) {
+      } else if (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID || i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV || i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+        if (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+          if (l_is_sve) {
+            libxsmm_aarch64_instruction_sve_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_ORR_V,
+                                                     cur_vreg, cur_vreg, 0, i_micro_kernel_config->tmp_vreg,
+                                                     l_pred_reg, l_sve_type );
+          } else {
+            libxsmm_aarch64_instruction_asimd_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_ORR_V,
+                                                       cur_vreg, cur_vreg, 0, i_micro_kernel_config->tmp_vreg,
+                                                       l_tupletype );
+          }
+        }
         if (l_is_sve) {
           libxsmm_generator_sigmoid_ps_rational_78_aarch64_sve(
             io_generated_code,
@@ -1292,6 +1303,16 @@ void libxsmm_compute_unary_aarch64_2d_reg_block_op( libxsmm_generated_code*     
                                                        l_tupletype );
             libxsmm_aarch64_instruction_asimd_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_FMUL_V,
                                                        i_micro_kernel_config->vec_x2, cur_vreg, 0, cur_vreg,
+                                                       l_tupletype );
+          }
+        } else if (i_mateltwise_desc->param == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+          if (l_is_sve) {
+            libxsmm_aarch64_instruction_sve_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_SVE_FMUL_V,
+                                                     i_micro_kernel_config->tmp_vreg, cur_vreg, 0, cur_vreg,
+                                                     l_pred_reg, l_sve_type );
+          } else {
+            libxsmm_aarch64_instruction_asimd_compute( io_generated_code, LIBXSMM_AARCH64_INSTR_ASIMD_FMUL_V,
+                                                       i_micro_kernel_config->tmp_vreg, cur_vreg, 0, cur_vreg,
                                                        l_tupletype );
           }
         }
@@ -2798,6 +2819,7 @@ void libxsmm_compute_unary_binary_aarch64_2d_reg_block( libxsmm_generated_code* 
       case LIBXSMM_MELTW_TYPE_UNARY_TANH:
       case LIBXSMM_MELTW_TYPE_UNARY_EXP:
       case LIBXSMM_MELTW_TYPE_UNARY_SIGMOID:
+      case LIBXSMM_MELTW_TYPE_UNARY_SILU:
       case LIBXSMM_MELTW_TYPE_UNARY_TANH_INV:
       case LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV:
       case LIBXSMM_MELTW_TYPE_UNARY_GELU:
@@ -2987,6 +3009,11 @@ void libxsmm_configure_unary_aarch64_kernel_vregs_masks(  libxsmm_generated_code
     i_micro_kernel_config->tmp_vreg  = i_micro_kernel_config->reserved_zmms;
     i_micro_kernel_config->tmp_vreg2 = i_micro_kernel_config->reserved_zmms + 1;
     i_micro_kernel_config->reserved_zmms = i_micro_kernel_config->reserved_zmms + 2;
+  }
+
+  if (op == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+    i_micro_kernel_config->tmp_vreg = i_micro_kernel_config->reserved_zmms;
+    i_micro_kernel_config->reserved_zmms = i_micro_kernel_config->reserved_zmms + 1;
   }
 
   if ( (op == LIBXSMM_MELTW_TYPE_UNARY_DECOMP_FP32_TO_BF16X2) ||
@@ -3539,7 +3566,7 @@ void libxsmm_configure_unary_aarch64_kernel_vregs_masks(  libxsmm_generated_code
     i_micro_kernel_config->reserved_zmms = reserved_zmms;
   }
 
-  if (op == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID || op == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV) {
+  if (op == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID || op == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID_INV || op == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
     unsigned int reserved_zmms = i_micro_kernel_config->reserved_zmms;
     unsigned int reserved_mask_regs = i_micro_kernel_config->reserved_mask_regs;
     reserved_zmms += 18;

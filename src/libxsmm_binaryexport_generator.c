@@ -17,6 +17,7 @@
 #define RELU_NOBITMASK  1
 #define RELU_BITMASK    2
 #define SIGMOID         3
+#define SILU            4
 
 #define EXPORT_CODE_BUFFERSIZE 262144
 
@@ -92,7 +93,7 @@ void print_help(void) {
   printf("gemm-ext (extra parameter)\n");
   printf("    post_gemm_binary: 0 - none, 1 - colbias_add\n");
   printf("    post_gemm_binday_LD\n");
-  printf("    post_gemm_unary: 0 - none, 1 - relu_nobitmask, 2 - relu_bitmask, 3 - sigmoid \n");
+  printf("    post_gemm_unary: 0 - none, 1 - relu_nobitmask, 2 - relu_bitmask, 3 - sigmoid, 4 - silu \n");
   printf("    post_gemm_unary_LD\n");
   printf("\n\n");
 }
@@ -464,9 +465,9 @@ int export_gemm( int argc, char* argv [] ) {
     }
 
     if (l_unary_postop != OP_NONE ) {
-      if (l_unary_postop == SIGMOID) {
+      if (l_unary_postop == SIGMOID || l_unary_postop == SILU) {
         l_argops.ldcp = l_uop_ld;
-        l_argops.cp_unary_type  = LIBXSMM_MELTW_TYPE_UNARY_SIGMOID;
+        l_argops.cp_unary_type  = (l_unary_postop == SIGMOID) ? LIBXSMM_MELTW_TYPE_UNARY_SIGMOID : LIBXSMM_MELTW_TYPE_UNARY_SILU;
       }
 
       if (l_unary_postop == RELU_NOBITMASK) {

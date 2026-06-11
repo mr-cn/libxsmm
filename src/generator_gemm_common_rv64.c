@@ -845,6 +845,9 @@ void libxsmm_generator_gemm_apply_fusion_2dregblock_rv64(  libxsmm_generated_cod
   } else if ( (io_micro_kernel_config->fused_sigmoid > 0) ) {
     LIBXSMM_HANDLE_ERROR( io_generated_code, LIBXSMM_ERR_UNKNOWN_OPERATION );
     return;
+  } else if ( (io_micro_kernel_config->fused_silu > 0) ) {
+    LIBXSMM_HANDLE_ERROR( io_generated_code, LIBXSMM_ERR_UNKNOWN_OPERATION );
+    return;
   } else {
     return;
   }

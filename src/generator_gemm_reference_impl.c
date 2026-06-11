@@ -141,6 +141,7 @@ typedef struct libxsmm_gemm_def {
   unsigned int fuse_relu;
   unsigned int fuse_relu_bitmask;
   unsigned int fuse_sigmoid;
+  unsigned int fuse_silu;
   unsigned int fuse_vnni_c;
   unsigned int fuse_via_scratch;
 
@@ -231,7 +232,7 @@ unsigned char libxsmm_calculate_zpt(libxsmm_blasint i_br, libxsmm_blasint i_m, c
 
 LIBXSMM_API_INTERN
 void libxsmm_ref_allocate_c_scratch(libxsmm_gemm_def* i_gemm_def) {
-  if (i_gemm_def->fuse_colbias_add > 0 || i_gemm_def->fuse_relu > 0 || i_gemm_def->fuse_sigmoid > 0) {
+  if (i_gemm_def->fuse_colbias_add > 0 || i_gemm_def->fuse_relu > 0 || i_gemm_def->fuse_sigmoid > 0 || i_gemm_def->fuse_silu > 0) {
     if (i_gemm_def->c_type != LIBXSMM_DATATYPE_F32) {
       i_gemm_def->fuse_via_scratch = 1;
       i_gemm_def->c_scratch = (void*) malloc((size_t)i_gemm_def->ldc * i_gemm_def->n * 4);
@@ -324,12 +325,12 @@ void libxsmm_ref_apply_postop(libxsmm_gemm_def* i_gemm_def, void *param, const l
       unary_param.out.secondary = (void*)gemm_param->c.secondary;
     }
     libxsmm_reference_unary_elementwise(&unary_param, desc);
-  } else if (i_gemm_def->fuse_sigmoid > 0) {
+  } else if (i_gemm_def->fuse_sigmoid > 0 || i_gemm_def->fuse_silu > 0) {
     /* Setup unary desc and call refence kernel*/
     libxsmm_meltw_unary_param unary_param;
     libxsmm_descriptor_blob blob;
     const libxsmm_meltw_descriptor *const desc = libxsmm_meltw_descriptor_init2(&blob, LIBXSMM_DATATYPE_F32, LIBXSMM_DATATYPE_UNSUPPORTED, LIBXSMM_DATATYPE_UNSUPPORTED, LIBXSMM_DATATYPE_F32, (libxsmm_datatype)LIBXSMM_GEMM_GETENUM_C_PREC( i_xgemm_desc->datatype ), i_xgemm_desc->m, i_xgemm_desc->n,
-        i_xgemm_desc->ldc, i_xgemm_desc->ldc, 0, 0, (unsigned short)LIBXSMM_MELTW_FLAG_UNARY_NONE, (unsigned short)LIBXSMM_MELTW_TYPE_UNARY_SIGMOID, LIBXSMM_MELTW_OPERATION_UNARY);
+        i_xgemm_desc->ldc, i_xgemm_desc->ldc, 0, 0, (unsigned short)LIBXSMM_MELTW_FLAG_UNARY_NONE, (unsigned short)((i_gemm_def->fuse_silu > 0) ? LIBXSMM_MELTW_TYPE_UNARY_SILU : LIBXSMM_MELTW_TYPE_UNARY_SIGMOID), LIBXSMM_MELTW_OPERATION_UNARY);
     unary_param.in.primary  = (void*)i_gemm_def->c_scratch;
     unary_param.out.primary = (void*)gemm_param->c.primary;
     libxsmm_reference_unary_elementwise(&unary_param, desc);
@@ -378,6 +379,7 @@ void libxsmm_setup_gemm_def(libxsmm_gemm_def* i_gemm_def, void *param, const lib
   l_gemm_def.fuse_relu = 0;
   l_gemm_def.fuse_relu_bitmask = 0;
   l_gemm_def.fuse_sigmoid = 0;
+  l_gemm_def.fuse_silu = 0;
   l_gemm_def.fuse_vnni_c = 0;
   l_gemm_def.fuse_colbias_add = 0;
 
@@ -393,6 +395,9 @@ void libxsmm_setup_gemm_def(libxsmm_gemm_def* i_gemm_def, void *param, const lib
     }
     if (i_xgemm_desc->eltw_cp_param == LIBXSMM_MELTW_TYPE_UNARY_SIGMOID) {
       l_gemm_def.fuse_sigmoid = 1;
+    }
+    if (i_xgemm_desc->eltw_cp_param == LIBXSMM_MELTW_TYPE_UNARY_SILU) {
+      l_gemm_def.fuse_silu = 1;
     }
   }
 
